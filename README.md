@@ -1,32 +1,49 @@
-# React + TypeScript + Vite
+# Tizbor Sanat — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript + Vite frontend for Tizbor Sanat.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + Vite
+- TypeScript
+- Tailwind CSS v4
+- React Query
+- React Router
+- Zustand
+- React Hook Form + Zod
+- pnpm
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+pnpm install
+cp .env.example .env
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Environment variables
+
+| Variable       | Description          |
+| -------------- | -------------------- |
+| `VITE_API_URL` | Backend API base URL |
+
+## Scripts
+
+| Command             | Description                      |
+| ------------------- | -------------------------------- |
+| `pnpm dev`          | Start dev server                 |
+| `pnpm build`        | Type-check and build             |
+| `pnpm preview`      | Preview production build         |
+| `pnpm lint`         | Run oxlint                       |
+| `pnpm format`       | Format all files with Prettier   |
+| `pnpm format:check` | Check formatting without writing |
+
+## Linting & formatting
+
+- Lint rules: [.oxlintrc.json](.oxlintrc.json)
+- Format rules: [.prettierrc.json](.prettierrc.json)
+- A pre-commit hook (Husky + lint-staged) lints and formats staged files automatically.
+
+## CI
+
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs lint, format check, type-check, and build on every push/PR to `main`.

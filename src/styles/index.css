@@ -1,0 +1,101 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+@theme {
+  --font-sans: 'IRANYekanWeb', ui-sans-serif, system-ui, sans-serif;
+
+  /* surfaces */
+  --color-bg: #f6f3ed;
+  --color-surface: #ffffff;
+  --color-surface-alt: #fbf8f3;
+  --color-border: #e6dfd2;
+
+  /* text */
+  --color-ink: #241f1b;
+  --color-muted: #7c7265;
+
+  /* brand (green) */
+  --color-brand: #1f5d4c;
+  --color-brand-dark: #163f34;
+  --color-brand-soft: #e3ede8;
+  /* text colors for use on dark brand backgrounds (sidebar, primary tiles, login visual) */
+  --color-brand-ink: #dceae4;
+  --color-brand-ink-soft: #bfdbd0;
+  --color-brand-ink-muted: #9fc2b5;
+  --color-brand-ink-tint: #cfe6de;
+
+  /* accent (copper) */
+  --color-accent: #a8632e;
+  --color-accent-ink: #6b3a1c;
+  --color-accent-soft: #f1e1d2;
+
+  /* danger (debt) */
+  --color-danger: #a23b3b;
+  --color-danger-soft: #f3dedc;
+
+  /* edit (blue-grey) */
+  --color-edit: #4e6e8e;
+  --color-edit-soft: #e3eaf1;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.tabular-fa {
+  font-variant-numeric: tabular-nums;
+}
+
+.shadow-card {
+  box-shadow:
+    0 1px 2px rgba(36, 31, 27, 0.05),
+    0 10px 24px -14px rgba(36, 31, 27, 0.28);
+}
+
+.shadow-float {
+  box-shadow: 0 14px 32px -12px rgba(22, 63, 52, 0.38);
+}
+
+@keyframes sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+.sheet-overlay {
+  animation: sheet-fade-in 150ms ease-out;
+}
+
+.sheet-content {
+  animation: sheet-slide-in 200ms ease-out;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice-print-area,
+  #invoice-print-area * {
+    visibility: visible;
+  }
+  #invoice-print-area {
+    position: absolute;
+    inset: 0;
+  }
+}

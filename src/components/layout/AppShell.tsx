@@ -1,22 +1,22 @@
-import { LogOut } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
-import { Avatar } from '@/components/ui/Avatar'
-import { cn } from '@/lib/cn'
-import { useAuthStore } from '@/store/authStore'
-import { navItemsForRole } from './navConfig'
+import { LogOut } from "lucide-react";
+import { NavLink, Outlet } from "react-router-dom";
+import { Avatar } from "@/components/ui/Avatar";
+import { cn } from "@/lib/cn";
+import { useAuthStore } from "@/store/authStore";
+import { navItemsForRole } from "./navConfig";
 
-const bottomTabItems = (role: 'admin' | 'partner') =>
+const bottomTabItems = (role: "admin" | "partner") =>
   navItemsForRole(role).filter((item) =>
-    ['/', '/transactions', '/ledger', '/reports/monthly'].includes(item.to),
-  )
+    ["/", "/transactions", "/ledger", "/reports/monthly"].includes(item.to),
+  );
 
 export function AppShell() {
-  const partner = useAuthStore((state) => state.partner)
-  const logout = useAuthStore((state) => state.logout)
+  const partner = useAuthStore((state) => state.partner);
+  const logout = useAuthStore((state) => state.logout);
 
-  if (!partner) return null
+  if (!partner) return null;
 
-  const items = navItemsForRole(partner.role)
+  const items = navItemsForRole(partner.role);
 
   return (
     <div className="flex min-h-dvh bg-surface">
@@ -37,11 +37,11 @@ export function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === "/"}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[13px] text-brand-ink-soft transition-colors',
-                  isActive ? 'bg-white/10 font-semibold text-white' : 'hover:bg-white/5',
+                  "flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[13px] text-brand-ink-soft transition-colors",
+                  isActive ? "bg-white/10 font-semibold text-white" : "hover:bg-white/5",
                 )
               }
             >
@@ -55,9 +55,15 @@ export function AppShell() {
           <Avatar name={partner.name} tone="accent" />
           <div className="min-w-0 text-xs leading-tight">
             <b className="block truncate font-semibold text-white">{partner.name}</b>
-            <span className="text-[10.5px] text-brand-ink-muted">{partner.role === 'admin' ? 'حسابدار' : 'شریک'}</span>
+            <span className="text-[10.5px] text-brand-ink-muted">
+              {partner.role === "admin" ? "حسابدار" : "شریک"}
+            </span>
           </div>
-          <button onClick={logout} className="ms-auto rounded-md p-1.5 text-brand-ink-muted hover:text-white" aria-label="خروج">
+          <button
+            onClick={logout}
+            className="ms-auto rounded-md p-1.5 text-brand-ink-muted hover:text-white"
+            aria-label="خروج"
+          >
             <LogOut className="size-4" />
           </button>
         </div>
@@ -73,11 +79,11 @@ export function AppShell() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.to === "/"}
             className={({ isActive }) =>
               cn(
-                'flex flex-1 flex-col items-center gap-1 rounded-[10px] py-1 text-[10.5px] font-medium',
-                isActive ? 'bg-brand-soft font-bold text-brand-dark' : 'text-muted',
+                "flex flex-1 flex-col items-center gap-1 rounded-[10px] py-1 text-[10.5px] font-medium",
+                isActive ? "bg-brand-soft font-bold text-brand-dark" : "text-muted",
               )
             }
           >
@@ -87,5 +93,5 @@ export function AppShell() {
         ))}
       </nav>
     </div>
-  )
+  );
 }

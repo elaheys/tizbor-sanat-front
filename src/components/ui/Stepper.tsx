@@ -1,7 +1,15 @@
-import { Minus, Plus } from 'lucide-react'
-import { toPersianDigits } from '@/utils/persianDigits'
+import { Minus, Plus } from "lucide-react";
+import { toPersianDigits } from "@/utils/persianDigits";
 
-export function Stepper({ value, onChange, min = 1 }: { value: number; onChange: (value: number) => void; min?: number }) {
+export function Stepper({
+  value,
+  onChange,
+  min = 1,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+}) {
   return (
     <div className="flex items-center gap-2.5">
       <button
@@ -20,5 +28,5 @@ export function Stepper({ value, onChange, min = 1 }: { value: number; onChange:
         <Plus className="size-3.5" />
       </button>
     </div>
-  )
+  );
 }

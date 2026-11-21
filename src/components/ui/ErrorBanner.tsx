@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from "lucide-react";
 
 export function ErrorBanner({ message }: { message: string }) {
   return (
@@ -6,5 +6,5 @@ export function ErrorBanner({ message }: { message: string }) {
       <AlertCircle className="mt-0.5 size-4 shrink-0" />
       <span>{message}</span>
     </div>
-  )
+  );
 }

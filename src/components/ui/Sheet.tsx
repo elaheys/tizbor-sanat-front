@@ -1,12 +1,12 @@
-import * as Dialog from '@radix-ui/react-dialog'
-import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import * as Dialog from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface SheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: ReactNode
-  children: ReactNode
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: ReactNode;
+  children: ReactNode;
 }
 
 export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
@@ -25,5 +25,5 @@ export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

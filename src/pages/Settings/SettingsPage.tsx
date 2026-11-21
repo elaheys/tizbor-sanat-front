@@ -1,26 +1,26 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { useChangePassword } from '@/api/auth/queries'
-import { Content, Topbar } from '@/components/layout/Topbar'
-import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { ErrorBanner } from '@/components/ui/ErrorBanner'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/Label'
-import { getApiErrorMessage } from '@/lib/apiError'
-import { useAuthStore } from '@/store/authStore'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useChangePassword } from "@/api/auth/queries";
+import { Content, Topbar } from "@/components/layout/Topbar";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { getApiErrorMessage } from "@/lib/apiError";
+import { useAuthStore } from "@/store/authStore";
 
 const schema = z.object({
-  current_password: z.string().min(1, 'رمز عبور فعلی را وارد کنید'),
-  new_password: z.string().min(8, 'رمز عبور جدید باید حداقل ۸ کاراکتر باشد'),
-})
+  current_password: z.string().min(1, "رمز عبور فعلی را وارد کنید"),
+  new_password: z.string().min(8, "رمز عبور جدید باید حداقل ۸ کاراکتر باشد"),
+});
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>;
 
 export function SettingsPage() {
-  const partner = useAuthStore((state) => state.partner)
-  const changePassword = useChangePassword()
+  const partner = useAuthStore((state) => state.partner);
+  const changePassword = useChangePassword();
 
   const {
     register,
@@ -29,12 +29,12 @@ export function SettingsPage() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { current_password: '', new_password: '' },
-  })
+    defaultValues: { current_password: "", new_password: "" },
+  });
 
   const onSubmit = handleSubmit((values) => {
-    changePassword.mutate(values, { onSuccess: () => reset() })
-  })
+    changePassword.mutate(values, { onSuccess: () => reset() });
+  });
 
   return (
     <div>
@@ -55,7 +55,7 @@ export function SettingsPage() {
             </div>
             <div className="flex justify-between py-2.5 text-[12.5px]">
               <span className="text-muted">نقش</span>
-              <b className="font-semibold">{partner?.role === 'admin' ? 'حسابدار' : 'شریک'}</b>
+              <b className="font-semibold">{partner?.role === "admin" ? "حسابدار" : "شریک"}</b>
             </div>
           </Card>
         </div>
@@ -70,7 +70,7 @@ export function SettingsPage() {
                   id="current_password"
                   type="password"
                   autoComplete="current-password"
-                  {...register('current_password')}
+                  {...register("current_password")}
                   error={errors.current_password?.message}
                 />
               </div>
@@ -80,21 +80,25 @@ export function SettingsPage() {
                   id="new_password"
                   type="password"
                   autoComplete="new-password"
-                  {...register('new_password')}
+                  {...register("new_password")}
                   error={errors.new_password?.message}
                 />
               </div>
 
-              {changePassword.isError && <ErrorBanner message={getApiErrorMessage(changePassword.error)} />}
-              {changePassword.isSuccess && <p className="text-[11.5px] text-brand-dark">رمز عبور با موفقیت تغییر کرد</p>}
+              {changePassword.isError && (
+                <ErrorBanner message={getApiErrorMessage(changePassword.error)} />
+              )}
+              {changePassword.isSuccess && (
+                <p className="text-[11.5px] text-brand-dark">رمز عبور با موفقیت تغییر کرد</p>
+              )}
 
               <Button type="submit" disabled={changePassword.isPending} className="justify-center">
-                {changePassword.isPending ? 'در حال ذخیره...' : 'ذخیرهٔ رمز جدید'}
+                {changePassword.isPending ? "در حال ذخیره..." : "ذخیرهٔ رمز جدید"}
               </Button>
             </form>
           </Card>
         </div>
       </Content>
     </div>
-  )
+  );
 }

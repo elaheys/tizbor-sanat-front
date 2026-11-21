@@ -1,19 +1,19 @@
-import * as RadixSelect from '@radix-ui/react-select'
-import { Check, ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/cn'
+import * as RadixSelect from "@radix-ui/react-select";
+import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 export interface SelectOption {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface SelectProps {
-  value: string
-  onChange: (value: string) => void
-  options: SelectOption[]
-  placeholder?: string
-  error?: string
-  disabled?: boolean
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
 }
 
 export function Select({ value, onChange, options, placeholder, error, disabled }: SelectProps) {
@@ -22,9 +22,9 @@ export function Select({ value, onChange, options, placeholder, error, disabled 
       <RadixSelect.Root value={value} onValueChange={onChange} disabled={disabled}>
         <RadixSelect.Trigger
           className={cn(
-            'flex h-[38px] w-full items-center justify-between rounded-[10px] border border-border bg-surface px-3 text-[13px] text-ink outline-none transition-colors',
-            'focus:border-brand focus:ring-2 focus:ring-brand-soft',
-            error && 'border-danger',
+            "flex h-[38px] w-full items-center justify-between rounded-[10px] border border-border bg-surface px-3 text-[13px] text-ink outline-none transition-colors",
+            "focus:border-brand focus:ring-2 focus:ring-brand-soft",
+            error && "border-danger",
           )}
         >
           <RadixSelect.Value placeholder={placeholder} />
@@ -57,5 +57,5 @@ export function Select({ value, onChange, options, placeholder, error, disabled 
       </RadixSelect.Root>
       {error && <span className="text-xs text-danger">{error}</span>}
     </div>
-  )
+  );
 }

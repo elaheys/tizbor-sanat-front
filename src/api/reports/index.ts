@@ -1,14 +1,14 @@
-import api, { type RequestOptions } from '@/lib/axios'
+import api, { type RequestOptions } from "@/lib/axios";
 import type {
   DailyReport,
   GenerateSettlementsResponse,
   MonthlyBalanceRow,
   MonthlyReport,
   TransactionsSummaryRow,
-} from '@/types/report'
-import type { CustomerOpenBalanceRow } from '@/types/customer'
+} from "@/types/report";
+import type { CustomerOpenBalanceRow } from "@/types/customer";
 
-const PREFIX = '/reports'
+const PREFIX = "/reports";
 
 export const reportsApi = {
   monthly: (year: number, month: number, options?: RequestOptions) =>
@@ -27,4 +27,4 @@ export const reportsApi = {
     api.get<CustomerOpenBalanceRow[]>(`${PREFIX}/customers-open-balance`, options),
   daily: (date: string, options?: RequestOptions) =>
     api.get<DailyReport>(`${PREFIX}/daily`, { params: { date }, ...options }),
-}
+};

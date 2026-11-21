@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
-import jalaliday from 'jalaliday/dayjs'
+import dayjs from "dayjs";
+import jalaliday from "jalaliday/dayjs";
 
-dayjs.extend(jalaliday)
+dayjs.extend(jalaliday);
 
-export default dayjs
+export default dayjs;

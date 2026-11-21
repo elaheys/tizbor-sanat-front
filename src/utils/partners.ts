@@ -1,4 +1,4 @@
-import type { Partner } from '@/types/partner'
+import type { Partner } from "@/types/partner";
 
 /**
  * Active partners only, for assigning NEW records (transactions/loans/invoices) —
@@ -8,5 +8,5 @@ import type { Partner } from '@/types/partner'
  * missing from its own option list.
  */
 export function selectablePartners(partners: Partner[], currentId?: string): Partner[] {
-  return partners.filter((p) => p.is_active || String(p.id) === currentId)
+  return partners.filter((p) => p.is_active || String(p.id) === currentId);
 }

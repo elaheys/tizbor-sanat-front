@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from "lucide-react";
 
 export function LedgerFlow({ fromName, toName }: { fromName: string; toName: string }) {
   return (
@@ -13,5 +13,5 @@ export function LedgerFlow({ fromName, toName }: { fromName: string; toName: str
         <span className="text-[9.5px] font-medium text-muted">طلبکار</span>
       </div>
     </div>
-  )
+  );
 }

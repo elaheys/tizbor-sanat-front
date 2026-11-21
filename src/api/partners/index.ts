@@ -1,7 +1,7 @@
-import api, { type RequestOptions } from '@/lib/axios'
-import type { CreatePartnerInput, Partner, UpdatePartnerInput } from '@/types/partner'
+import api, { type RequestOptions } from "@/lib/axios";
+import type { CreatePartnerInput, Partner, UpdatePartnerInput } from "@/types/partner";
 
-const PREFIX = '/partners'
+const PREFIX = "/partners";
 
 export const partnersApi = {
   list: (options?: RequestOptions) => api.get<Partner[]>(PREFIX, options),
@@ -9,4 +9,4 @@ export const partnersApi = {
   update: (id: number, data: UpdatePartnerInput) => api.patch<Partner>(`${PREFIX}/${id}`, data),
   resetPassword: (id: number, new_password: string) =>
     api.patch<{ ok: true }>(`${PREFIX}/${id}/password`, { new_password }),
-}
+};

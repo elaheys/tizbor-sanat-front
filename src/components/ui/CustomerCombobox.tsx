@@ -1,63 +1,72 @@
-import { Plus, Search } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { useCreateCustomer, useCustomers } from '@/api/customers/queries'
-import { cn } from '@/lib/cn'
+import { Plus, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useCreateCustomer, useCustomers } from "@/api/customers/queries";
+import { cn } from "@/lib/cn";
 
 interface CustomerComboboxProps {
-  value: string | undefined
-  displayName: string | undefined
-  onChange: (customerId: string | undefined, name: string | undefined) => void
-  placeholder?: string
+  value: string | undefined;
+  displayName: string | undefined;
+  onChange: (customerId: string | undefined, name: string | undefined) => void;
+  placeholder?: string;
 }
 
-export function CustomerCombobox({ value, displayName, onChange, placeholder }: CustomerComboboxProps) {
-  const [query, setQuery] = useState(displayName ?? '')
-  const [open, setOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+export function CustomerCombobox({
+  value,
+  displayName,
+  onChange,
+  placeholder,
+}: CustomerComboboxProps) {
+  const [query, setQuery] = useState(displayName ?? "");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const customers = useCustomers()
-  const createCustomer = useCreateCustomer()
+  const customers = useCustomers();
+  const createCustomer = useCreateCustomer();
 
   useEffect(() => {
-    setQuery(displayName ?? '')
-  }, [displayName])
+    setQuery(displayName ?? "");
+  }, [displayName]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
+        setOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
-  const matches = (customers.data ?? []).filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()))
-  const exactMatch = (customers.data ?? []).find((c) => c.name.trim().toLowerCase() === query.trim().toLowerCase())
+  const matches = (customers.data ?? []).filter((c) =>
+    c.name.toLowerCase().includes(query.trim().toLowerCase()),
+  );
+  const exactMatch = (customers.data ?? []).find(
+    (c) => c.name.trim().toLowerCase() === query.trim().toLowerCase(),
+  );
 
   const selectCustomer = (id: number, name: string) => {
-    onChange(String(id), name)
-    setQuery(name)
-    setOpen(false)
-  }
+    onChange(String(id), name);
+    setQuery(name);
+    setOpen(false);
+  };
 
   const clearSelection = () => {
-    onChange(undefined, undefined)
-  }
+    onChange(undefined, undefined);
+  };
 
   const handleCreate = () => {
-    const name = query.trim()
-    if (!name) return
+    const name = query.trim();
+    if (!name) return;
     createCustomer.mutate(
       { name },
       {
         onSuccess: (res) => {
-          selectCustomer(res.data.id, res.data.name)
+          selectCustomer(res.data.id, res.data.name);
         },
       },
-    )
-  }
+    );
+  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -66,9 +75,9 @@ export function CustomerCombobox({ value, displayName, onChange, placeholder }: 
         <input
           value={query}
           onChange={(e) => {
-            setQuery(e.target.value)
-            setOpen(true)
-            if (value) clearSelection()
+            setQuery(e.target.value);
+            setOpen(true);
+            if (value) clearSelection();
           }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
@@ -86,7 +95,11 @@ export function CustomerCombobox({ value, displayName, onChange, placeholder }: 
               className="flex w-full items-center justify-between rounded-md px-3 py-2 text-start text-[13px] hover:bg-surface-alt"
             >
               <span>{c.name}</span>
-              {c.phone && <span className="text-[11px] text-muted" dir="ltr">{c.phone}</span>}
+              {c.phone && (
+                <span className="text-[11px] text-muted" dir="ltr">
+                  {c.phone}
+                </span>
+              )}
             </button>
           ))}
 
@@ -96,18 +109,20 @@ export function CustomerCombobox({ value, displayName, onChange, placeholder }: 
               onClick={handleCreate}
               disabled={createCustomer.isPending}
               className={cn(
-                'flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-[13px] font-semibold text-brand-dark hover:bg-brand-soft',
-                createCustomer.isPending && 'opacity-50',
+                "flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-[13px] font-semibold text-brand-dark hover:bg-brand-soft",
+                createCustomer.isPending && "opacity-50",
               )}
             >
               <Plus className="size-3.5" />
-              {createCustomer.isPending ? 'در حال ساخت...' : `ساخت مشتری جدید: «${query.trim()}»`}
+              {createCustomer.isPending ? "در حال ساخت..." : `ساخت مشتری جدید: «${query.trim()}»`}
             </button>
           )}
 
-          {matches.length === 0 && !query.trim() && <p className="p-3 text-center text-xs text-muted">برای جستجو تایپ کنید</p>}
+          {matches.length === 0 && !query.trim() && (
+            <p className="p-3 text-center text-xs text-muted">برای جستجو تایپ کنید</p>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }

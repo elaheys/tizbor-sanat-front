@@ -23,4 +23,64 @@ dist-ssr
 *.sln
 *.sw?
 
+# Editors
+.idea/
+.vscode/
+.DS_Store
+
+# Build
+build/
+.build/
+.dist/
+
+# Cache
+.cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.cache
+.parcel-cache
+.eslintcache
+*.tsbuildinfo
+
+# Deployment
 .env
+.env.test
+.env.demo
+.env.local
+.env.production
+.env.development
+
+# NPM
+.npm
+npm-debug.log*
+*.tgz
+
+# Yarn
+.yarn/
+.yarn-integrity
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage
+lib-cov
+*.lcov
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Claude Code (personal/local)
+.claude/settings.local.json
+.claude/worktrees/
+

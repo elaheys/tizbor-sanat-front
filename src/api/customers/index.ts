@@ -10,13 +10,19 @@ import type {
   UpdateCustomerInput,
 } from "@/types/customer";
 import type { CustomerAccountSummary } from "@/types/customer";
+import type { Page } from "@/types/pagination";
 
 const PREFIX = "/customers";
 const ACCOUNTS_PREFIX = "/customer-accounts";
+const PAGE_SIZE = 10;
 
 export const customersApi = {
   list: (q?: string, options?: RequestOptions) =>
     api.get<Customer[]>(PREFIX, { params: { q }, ...options }),
+  listPage: (q: string | undefined, page: number, options?: RequestOptions) =>
+    api
+      .get<Page<Customer>>(PREFIX, { params: { q, page, limit: PAGE_SIZE }, ...options })
+      .then((res) => res.data),
   get: (id: number, options?: RequestOptions) =>
     api.get<CustomerDetail>(`${PREFIX}/${id}`, options),
   create: (data: CreateCustomerInput) => api.post<Customer>(PREFIX, data),

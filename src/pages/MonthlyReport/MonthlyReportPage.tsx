@@ -1,4 +1,3 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import {
   useCustomersOpenBalance,
@@ -14,65 +13,95 @@ import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { LedgerCard } from "@/components/ui/LedgerCard";
 import { ListRow } from "@/components/ui/ListRow";
-import { Spinner } from "@/components/ui/Spinner";
+import { Select } from "@/components/ui/Select";
+import {
+  LedgerCardSkeleton,
+  ListRowSkeleton,
+  SkeletonList,
+  StatTileSkeleton,
+} from "@/components/ui/skeletons";
 import { StatTile } from "@/components/ui/StatTile";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { cn } from "@/lib/cn";
 import { useAuthStore } from "@/store/authStore";
+import { currentJalaliYearMonth, jalaliMonthName } from "@/utils/jalali";
 import { transactionTypeLabels } from "@/utils/labels";
 import { formatToman, toPersianDigits } from "@/utils/persianDigits";
 
+/** First Jalali year the app needs in the year picker — no older data exists. */
+const BASE_JALALI_YEAR = 1405;
+
 export function MonthlyReportPage() {
   const isAdmin = useAuthStore((state) => state.partner?.role === "admin");
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const todayJalali = currentJalaliYearMonth();
+  const [year, setYear] = useState(todayJalali.year);
+  const [month, setMonth] = useState(todayJalali.month);
 
+  // year/month are Jalali — the server now bins everything by real Jalali month
+  // boundaries, not Gregorian ones.
   const report = useMonthlyReport(year, month);
   const summary = useTransactionsSummary(year, month);
   const openBalances = useCustomersOpenBalance();
   const generateSettlements = useGenerateSettlements();
 
-  const shiftMonth = (delta: number) => {
-    let m = month + delta;
-    let y = year;
-    if (m > 12) {
-      m = 1;
-      y += 1;
-    } else if (m < 1) {
-      m = 12;
-      y -= 1;
-    }
-    setMonth(m);
-    setYear(y);
-  };
+  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1).map((m) => ({
+    value: String(m),
+    label: jalaliMonthName(m),
+  }));
+
+  const lastJalaliYear = Math.max(BASE_JALALI_YEAR, todayJalali.year);
+  const yearOptions = Array.from(
+    { length: lastJalaliYear - BASE_JALALI_YEAR + 1 },
+    (_, i) => BASE_JALALI_YEAR + i,
+  ).map((jalaliYear) => ({
+    value: String(jalaliYear),
+    label: toPersianDigits(jalaliYear),
+  }));
 
   return (
     <div>
       <Topbar
         title="گزارش ماهانه"
-        description="سال/ماه بر اساس تقویم میلادی (مطابق تاریخ ثبت تراکنش‌ها در سرور)"
         actions={
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => shiftMonth(-1)}
-              className="flex size-[26px] items-center justify-center rounded-lg border border-border bg-surface"
-            >
-              <ChevronRight className="size-3.5 text-muted" />
-            </button>
-            <span className="tabular-fa min-w-[72px] text-center text-[13.5px] font-bold">
-              {toPersianDigits(month)}/{toPersianDigits(year)}
-            </span>
-            <button
-              onClick={() => shiftMonth(1)}
-              className="flex size-[26px] items-center justify-center rounded-lg border border-border bg-surface"
-            >
-              <ChevronLeft className="size-3.5 text-muted" />
-            </button>
+          <div className="flex items-center gap-2">
+            <div className="w-28">
+              <Select
+                value={String(month)}
+                onChange={(v) => setMonth(Number(v))}
+                options={monthOptions}
+              />
+            </div>
+            <div className="w-24">
+              <Select
+                value={String(year)}
+                onChange={(v) => setYear(Number(v))}
+                options={yearOptions}
+              />
+            </div>
           </div>
         }
       />
       <Content>
-        {report.isLoading && <Spinner />}
+        {report.isLoading && (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <StatTileSkeleton />
+              <StatTileSkeleton />
+              <StatTileSkeleton />
+            </div>
+            <Card>
+              <SkeletonList count={3} item={ListRowSkeleton} />
+            </Card>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <Card>
+                <SkeletonList count={2} item={LedgerCardSkeleton} />
+              </Card>
+              <Card>
+                <SkeletonList count={2} item={ListRowSkeleton} />
+              </Card>
+            </div>
+          </>
+        )}
         {report.isError && <ErrorBanner message={getApiErrorMessage(report.error)} />}
 
         {report.data && (
@@ -93,7 +122,20 @@ export function MonthlyReportPage() {
                     title={p.partner_name}
                     subtitle={`سهم ${toPersianDigits(p.share_percent)}٪ از سود این ماه`}
                     side={
-                      <span className="tabular-fa font-bold">{formatToman(p.profit_share)}ت</span>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="tabular-fa font-bold">{formatToman(p.profit_share)}ت</span>
+                        {p.net_loan_balance !== 0 && (
+                          <span
+                            className={cn(
+                              "tabular-fa text-[10.5px]",
+                              p.net_loan_balance > 0 ? "text-brand-dark" : "text-danger",
+                            )}
+                          >
+                            {p.net_loan_balance > 0 ? "طلب از قرض: " : "بدهی قرض: "}
+                            {formatToman(Math.abs(p.net_loan_balance))}ت
+                          </span>
+                        )}
+                      </div>
                     }
                   />
                 ))}
@@ -119,7 +161,9 @@ export function MonthlyReportPage() {
                 {isAdmin && (
                   <Button
                     disabled={
-                      generateSettlements.isPending || report.data.needed_transfers.length === 0
+                      generateSettlements.isPending ||
+                      report.data.needed_transfers.length === 0 ||
+                      report.data.settlements_up_to_date
                     }
                     onClick={() => generateSettlements.mutate({ year, month })}
                     className="self-start"

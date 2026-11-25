@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import { TxIcon } from "./TxIcon";
 import type { TransactionWithNames } from "@/types/transaction";
-import { toRelativeTime } from "@/utils/jalali";
+import { toJalaliDateTime } from "@/utils/jalali";
 import { transactionTypeLabels } from "@/utils/labels";
 import { formatToman } from "@/utils/persianDigits";
 
@@ -20,14 +20,14 @@ export function TxRow({ tx, onEdit }: { tx: TransactionWithNames; onEdit?: () =>
           {[tx.customer_name, tx.partner_name].filter(Boolean).join(" · ")}
         </div>
       </div>
-      <div className="shrink-0 text-start">
+      <div className="shrink-0 text-left">
         <span
-          className={`tabular-fa text-[13.5px] font-bold ${isRevenue ? "text-brand-dark" : "text-danger"}`}
+          className={`tabular-fa text-[13.5px] font-bold  ${isRevenue ? "text-brand-dark" : "text-danger"}`}
         >
-          {formatToman(tx.amount)}ت
+          {formatToman(tx.amount)} ت
         </span>
         <span className="mt-0.5 block text-[10.5px] text-muted">
-          {toRelativeTime(tx.created_at)}
+          {toJalaliDateTime(tx.created_at)}
         </span>
       </div>
       {onEdit && (

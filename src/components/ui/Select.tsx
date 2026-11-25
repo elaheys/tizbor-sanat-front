@@ -1,5 +1,5 @@
 import * as RadixSelect from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export interface SelectOption {
@@ -38,7 +38,10 @@ export function Select({ value, onChange, options, placeholder, error, disabled 
             position="popper"
             sideOffset={4}
           >
-            <RadixSelect.Viewport className="p-1">
+            <RadixSelect.ScrollUpButton className="flex h-5 cursor-pointer items-center justify-center bg-surface text-muted">
+              <ChevronUp className="size-3.5" />
+            </RadixSelect.ScrollUpButton>
+            <RadixSelect.Viewport className="max-h-36 overflow-y-auto p-1">
               {options.map((option) => (
                 <RadixSelect.Item
                   key={option.value}
@@ -52,6 +55,9 @@ export function Select({ value, onChange, options, placeholder, error, disabled 
                 </RadixSelect.Item>
               ))}
             </RadixSelect.Viewport>
+            <RadixSelect.ScrollDownButton className="flex h-5 cursor-pointer items-center justify-center bg-surface text-muted">
+              <ChevronDown className="size-3.5" />
+            </RadixSelect.ScrollDownButton>
           </RadixSelect.Content>
         </RadixSelect.Portal>
       </RadixSelect.Root>

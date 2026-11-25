@@ -16,8 +16,13 @@ export const partnerQueries = {
 
 export const usePartners = () => useQuery(partnerQueries.list());
 
-const invalidatePartners = () =>
+// Changing a partner's share percent or active status changes how the monthly report
+// splits profit going forward, so it has to invalidate "reports" too, not just the
+// partners list.
+const invalidatePartners = () => {
   queryClient.invalidateQueries({ queryKey: partnerQueries.list().queryKey });
+  queryClient.invalidateQueries({ queryKey: ["reports"] });
+};
 
 export const useCreatePartner = () =>
   useMutation({

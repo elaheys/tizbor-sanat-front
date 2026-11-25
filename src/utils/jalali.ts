@@ -43,16 +43,6 @@ export function jalaliMonthName(month: number): string {
 
 const WEEKDAY_NAMES = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
 
-/** "۱۱:۲۰" for today, "دیروز" for yesterday, otherwise a short Jalali date. */
-export function toRelativeTime(isoDate: string | null | undefined): string {
-  if (!isoDate) return "";
-  const d = dayjs(isoDate);
-  const now = dayjs();
-  if (d.isSame(now, "day")) return toPersianDigits(d.format("HH:mm"));
-  if (d.isSame(now.subtract(1, "day"), "day")) return "دیروز";
-  return toJalaliDate(isoDate);
-}
-
 /** "سه‌شنبه، ۲۵ آبان ۱۴۰۵" */
 export function toJalaliLongDate(isoDate: string | null | undefined): string {
   if (!isoDate) return "";

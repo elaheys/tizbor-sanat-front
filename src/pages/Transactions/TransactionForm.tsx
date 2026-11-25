@@ -9,16 +9,19 @@ import { Button } from "@/components/ui/Button";
 import { CustomerCombobox } from "@/components/ui/CustomerCombobox";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Input } from "@/components/ui/Input";
+import { JalaliDatePicker } from "@/components/ui/JalaliDatePicker";
 import { Label } from "@/components/ui/Label";
 import { Segmented } from "@/components/ui/Segmented";
 import { Select } from "@/components/ui/Select";
 import { Stepper } from "@/components/ui/Stepper";
 import { Textarea } from "@/components/ui/Textarea";
 import { getApiErrorMessage } from "@/lib/apiError";
+import dayjs from "@/lib/dayjs";
 import { TRANSACTION_TYPES, type TransactionWithNames } from "@/types/transaction";
 import { newIdempotencyKey } from "@/utils/idempotencyKey";
 import { transactionTypeLabels } from "@/utils/labels";
 import { selectablePartners } from "@/utils/partners";
+import { formatToman } from "@/utils/persianDigits";
 
 const schema = z.object({
   type: z.enum(["sale", "purchase", "repair", "exchange"]),
@@ -26,9 +29,10 @@ const schema = z.object({
   partner_id: z.string().min(1, "شریک را انتخاب کنید"),
   customer_id: z.string().optional(),
   customer_name: z.string().optional(),
-  amount: z.number().positive("مبلغ باید بزرگتر از صفر باشد"),
+  unit_price: z.number().positive("قیمت واحد باید بزرگتر از صفر باشد"),
   quantity: z.number().int().positive(),
   note: z.string().optional(),
+  entry_date: z.string().min(1),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -60,29 +64,36 @@ export function TransactionForm({
       partner_id: "",
       customer_id: "",
       customer_name: "",
-      amount: 0,
+      unit_price: 0,
       quantity: 1,
       note: "",
+      entry_date: dayjs().format("YYYY-MM-DD"),
     },
   });
 
   useEffect(() => {
     if (transaction) {
+      // The stored `amount` is already the transaction's total (older rows were entered
+      // directly as a total, before quantity started multiplying it) — divide back out
+      // to get a per-unit price that reproduces the same total when multiplied by qty.
       reset({
         type: transaction.type,
         scissor_type: transaction.scissor_type,
         partner_id: String(transaction.partner_id),
         customer_id: transaction.customer_id ? String(transaction.customer_id) : "",
         customer_name: transaction.customer_name ?? "",
-        amount: Number(transaction.amount),
+        unit_price: Math.round(Number(transaction.amount) / transaction.quantity),
         quantity: transaction.quantity,
         note: transaction.note ?? "",
+        entry_date: dayjs().format("YYYY-MM-DD"),
       });
     }
   }, [transaction, reset]);
 
   const mutation = transaction ? updateTx : createTx;
   const quantity = watch("quantity");
+  const unitPrice = watch("unit_price");
+  const finalAmount = (unitPrice || 0) * (quantity || 0);
 
   const onSubmit = handleSubmit((values) => {
     const payload = {
@@ -90,16 +101,19 @@ export function TransactionForm({
       scissor_type: values.scissor_type,
       partner_id: Number(values.partner_id),
       customer_id: values.customer_id ? Number(values.customer_id) : undefined,
-      amount: values.amount,
+      amount: values.unit_price * values.quantity,
       quantity: values.quantity,
       note: values.note || undefined,
-    } as const;
+    };
 
     if (transaction) {
       updateTx.mutate({ id: transaction.id, data: payload }, { onSuccess: onDone });
     } else {
       createTx.mutate(
-        { data: payload, idempotencyKey: newIdempotencyKey() },
+        {
+          data: { ...payload, created_at: values.entry_date },
+          idempotencyKey: newIdempotencyKey(),
+        },
         { onSuccess: onDone },
       );
     }
@@ -174,11 +188,11 @@ export function TransactionForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="amount">مبلغ</Label>
+        <Label htmlFor="unit_price">قیمت واحد</Label>
         <AmountInput
-          id="amount"
-          {...register("amount", { valueAsNumber: true })}
-          error={errors.amount?.message}
+          id="unit_price"
+          {...register("unit_price", { valueAsNumber: true })}
+          error={errors.unit_price?.message}
         />
       </div>
 
@@ -189,6 +203,24 @@ export function TransactionForm({
           onChange={(v) => setValue("quantity", v, { shouldValidate: true })}
         />
       </div>
+
+      <div className="flex items-center justify-between rounded-[10px] bg-surface-alt px-3 py-2.5 text-[13px]">
+        <span className="text-muted">مبلغ نهایی</span>
+        <span className="tabular-fa font-bold">{formatToman(finalAmount)} تومان</span>
+      </div>
+
+      {!transaction && (
+        <div className="flex flex-col gap-1.5">
+          <Label>تاریخ</Label>
+          <Controller
+            control={control}
+            name="entry_date"
+            render={({ field }) => (
+              <JalaliDatePicker value={field.value} onChange={field.onChange} />
+            )}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="note">یادداشت (اختیاری)</Label>

@@ -4,7 +4,7 @@ import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Sheet } from "@/components/ui/Sheet";
-import { Spinner } from "@/components/ui/Spinner";
+import { AccountCardSkeleton } from "@/components/ui/skeletons";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
 import { toJalaliDate } from "@/utils/jalali";
@@ -33,7 +33,7 @@ export function AccountDetailSheet({
       }}
       title="جزئیات حساب قسطی"
     >
-      {account.isLoading && <Spinner />}
+      {account.isLoading && <AccountCardSkeleton />}
       {account.isError && <ErrorBanner message={getApiErrorMessage(account.error)} />}
       {account.data && (
         <div className="flex flex-col gap-5">

@@ -2,15 +2,17 @@ import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCustomersOpenBalance } from "@/api/reports/queries";
-import { useCustomers } from "@/api/customers/queries";
+import { useCustomersInfinite } from "@/api/customers/queries";
 import { Content, Topbar } from "@/components/layout/Topbar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { ListRow } from "@/components/ui/ListRow";
 import { Sheet } from "@/components/ui/Sheet";
+import { ListRowSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { paths } from "@/routes/paths";
@@ -24,7 +26,8 @@ export function CustomersPage() {
   const [q, setQ] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
 
-  const customers = useCustomers(q || undefined);
+  const customers = useCustomersInfinite(q || undefined);
+  const customerRows = customers.data?.pages.flatMap((p) => p.data) ?? [];
   const openBalances = useCustomersOpenBalance();
 
   const balanceByCustomer = useMemo(() => {
@@ -56,11 +59,15 @@ export function CustomersPage() {
           )}
         </div>
 
-        {customers.isLoading && <Spinner />}
+        {customers.isLoading && (
+          <Card>
+            <SkeletonList count={5} item={ListRowSkeleton} />
+          </Card>
+        )}
         {customers.isError && <ErrorBanner message={getApiErrorMessage(customers.error)} />}
         {customers.data && (
           <Card>
-            {customers.data.map((c) => {
+            {customerRows.map((c) => {
               const balance = balanceByCustomer.get(c.id);
               return (
                 <ListRow
@@ -80,8 +87,21 @@ export function CustomersPage() {
                 />
               );
             })}
-            {customers.data.length === 0 && (
+            {customerRows.length === 0 && (
               <p className="p-8 text-center text-xs text-muted">مشتری‌ای یافت نشد</p>
+            )}
+            {customers.hasNextPage && (
+              <>
+                {customers.isFetchingNextPage && (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                )}
+                <InfiniteScrollSentinel
+                  onIntersect={() => customers.fetchNextPage()}
+                  disabled={customers.isFetchingNextPage}
+                />
+              </>
             )}
           </Card>
         )}

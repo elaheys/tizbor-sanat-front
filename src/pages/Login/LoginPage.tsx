@@ -13,7 +13,7 @@ import { paths } from "@/routes/paths";
 import { useAuthStore } from "@/store/authStore";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "نام کاربری را وارد کنید"),
+  username: z.string().trim().min(1, "نام کاربری را وارد کنید"),
   password: z.string().min(1, "رمز عبور را وارد کنید"),
 });
 

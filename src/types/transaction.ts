@@ -34,6 +34,7 @@ export interface CreateTransactionInput {
   amount: number;
   quantity?: number;
   note?: string;
+  created_at?: string;
 }
 
 export interface UpdateTransactionInput {

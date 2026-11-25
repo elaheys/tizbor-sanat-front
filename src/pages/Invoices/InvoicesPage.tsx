@@ -1,12 +1,14 @@
 import { FileSpreadsheet, Plus } from "lucide-react";
 import { useState } from "react";
-import { useInvoices } from "@/api/invoices/queries";
+import { useInvoicesInfinite } from "@/api/invoices/queries";
 import { Content, Topbar } from "@/components/layout/Topbar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { ListRow } from "@/components/ui/ListRow";
 import { Sheet } from "@/components/ui/Sheet";
+import { ListRowSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
@@ -21,7 +23,8 @@ export function InvoicesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [previewing, setPreviewing] = useState<InvoiceWithNames | null>(null);
 
-  const invoices = useInvoices();
+  const invoices = useInvoicesInfinite();
+  const invoiceRows = invoices.data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
     <div>
@@ -36,11 +39,15 @@ export function InvoicesPage() {
         }
       />
       <Content>
-        {invoices.isLoading && <Spinner />}
+        {invoices.isLoading && (
+          <Card>
+            <SkeletonList count={5} item={ListRowSkeleton} />
+          </Card>
+        )}
         {invoices.isError && <ErrorBanner message={getApiErrorMessage(invoices.error)} />}
         {invoices.data && (
           <Card>
-            {invoices.data.map((inv) => (
+            {invoiceRows.map((inv) => (
               <ListRow
                 key={inv.id}
                 onClick={() => setPreviewing(inv)}
@@ -55,8 +62,21 @@ export function InvoicesPage() {
                 side={<span className="tabular-fa font-bold">{formatToman(inv.amount)}ت</span>}
               />
             ))}
-            {invoices.data.length === 0 && (
+            {invoiceRows.length === 0 && (
               <p className="p-8 text-center text-xs text-muted">فاکتوری صادر نشده است</p>
+            )}
+            {invoices.hasNextPage && (
+              <>
+                {invoices.isFetchingNextPage && (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                )}
+                <InfiniteScrollSentinel
+                  onIntersect={() => invoices.fetchNextPage()}
+                  disabled={invoices.isFetchingNextPage}
+                />
+              </>
             )}
           </Card>
         )}

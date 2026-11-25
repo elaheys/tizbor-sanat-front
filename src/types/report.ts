@@ -26,6 +26,8 @@ export interface MonthlyReport {
   profit: number;
   partners: MonthlyPartnerReport[];
   needed_transfers: MonthlyTransfer[];
+  settlements_generated: boolean;
+  settlements_up_to_date: boolean;
 }
 
 export interface MonthlyBalanceRow {

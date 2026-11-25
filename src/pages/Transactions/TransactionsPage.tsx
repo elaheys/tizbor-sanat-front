@@ -1,13 +1,15 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { usePartners } from "@/api/partners/queries";
-import { useDeleteTransaction, useTransactions } from "@/api/transactions/queries";
+import { useDeleteTransaction, useTransactionsInfinite } from "@/api/transactions/queries";
 import { Content, Topbar } from "@/components/layout/Topbar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { Select } from "@/components/ui/Select";
 import { Sheet } from "@/components/ui/Sheet";
+import { SkeletonList, TxRowSkeleton } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
 import { TxRow } from "@/components/ui/TxRow";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -21,6 +23,9 @@ import { transactionTypeLabels } from "@/utils/labels";
 import { selectablePartners } from "@/utils/partners";
 import { TransactionForm } from "./TransactionForm";
 
+const ALL_TYPES = "__all_types__";
+const ALL_PARTNERS = "__all_partners__";
+
 export function TransactionsPage() {
   const isAdmin = useAuthStore((state) => state.partner?.role === "admin");
   const [filters, setFilters] = useState<TransactionFilters>({});
@@ -28,8 +33,9 @@ export function TransactionsPage() {
   const [editing, setEditing] = useState<TransactionWithNames | undefined>(undefined);
 
   const partners = usePartners();
-  const transactions = useTransactions(filters);
+  const transactions = useTransactionsInfinite(filters);
   const deleteTx = useDeleteTransaction();
+  const txRows = transactions.data?.pages.flatMap((p) => p.data) ?? [];
 
   const openCreate = () => {
     setEditing(undefined);
@@ -57,42 +63,71 @@ export function TransactionsPage() {
         <div className="flex flex-wrap gap-2.5">
           <div className="w-40">
             <Select
-              value={filters.type ?? ""}
+              value={filters.type ?? ALL_TYPES}
               onChange={(v) =>
-                setFilters((f) => ({ ...f, type: (v || undefined) as TransactionFilters["type"] }))
+                setFilters((f) => ({
+                  ...f,
+                  type: v === ALL_TYPES ? undefined : (v as TransactionFilters["type"]),
+                }))
               }
-              placeholder="همهٔ انواع"
-              options={TRANSACTION_TYPES.map((t) => ({
-                value: t,
-                label: transactionTypeLabels[t],
-              }))}
+              options={[
+                { value: ALL_TYPES, label: "همهٔ انواع" },
+                ...TRANSACTION_TYPES.map((t) => ({
+                  value: t,
+                  label: transactionTypeLabels[t],
+                })),
+              ]}
             />
           </div>
           <div className="w-40">
             <Select
-              value={filters.partner_id ? String(filters.partner_id) : ""}
-              onChange={(v) => setFilters((f) => ({ ...f, partner_id: v ? Number(v) : undefined }))}
-              placeholder="همهٔ شرکا"
-              options={selectablePartners(
-                partners.data ?? [],
-                filters.partner_id ? String(filters.partner_id) : undefined,
-              ).map((p) => ({
-                value: String(p.id),
-                label: p.name,
-              }))}
+              value={filters.partner_id ? String(filters.partner_id) : ALL_PARTNERS}
+              onChange={(v) =>
+                setFilters((f) => ({
+                  ...f,
+                  partner_id: v === ALL_PARTNERS ? undefined : Number(v),
+                }))
+              }
+              options={[
+                { value: ALL_PARTNERS, label: "همهٔ شرکا" },
+                ...selectablePartners(
+                  partners.data ?? [],
+                  filters.partner_id ? String(filters.partner_id) : undefined,
+                ).map((p) => ({
+                  value: String(p.id),
+                  label: p.name,
+                })),
+              ]}
             />
           </div>
         </div>
 
-        {transactions.isLoading && <Spinner />}
+        {transactions.isLoading && (
+          <Card>
+            <SkeletonList count={5} item={TxRowSkeleton} />
+          </Card>
+        )}
         {transactions.isError && <ErrorBanner message={getApiErrorMessage(transactions.error)} />}
         {transactions.data && (
           <Card>
-            {transactions.data.map((tx) => (
+            {txRows.map((tx) => (
               <TxRow key={tx.id} tx={tx} onEdit={isAdmin ? () => openEdit(tx) : undefined} />
             ))}
-            {transactions.data.length === 0 && (
+            {txRows.length === 0 && (
               <p className="p-8 text-center text-xs text-muted">تراکنشی ثبت نشده است</p>
+            )}
+            {transactions.hasNextPage && (
+              <>
+                {transactions.isFetchingNextPage && (
+                  <div className="flex justify-center p-4">
+                    <Spinner />
+                  </div>
+                )}
+                <InfiniteScrollSentinel
+                  onIntersect={() => transactions.fetchNextPage()}
+                  disabled={transactions.isFetchingNextPage}
+                />
+              </>
             )}
           </Card>
         )}

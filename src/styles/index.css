@@ -48,6 +48,24 @@ body {
   color: var(--color-ink);
 }
 
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+/*
+ * Radix popovers (Select, Dialog) lock body scroll while open by setting
+ * overflow:hidden + margin-right on body[data-scroll-locked]. That hides
+ * the native scrollbar and compensates with a margin, which in this RTL
+ * layout showed up as a gap/flicker on the right. We don't need
+ * background-scroll locking, so just neutralize both and let the
+ * scrollbar stay put.
+ */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+  overflow: visible !important;
+}
+
 body {
   font-family: var(--font-sans);
 }

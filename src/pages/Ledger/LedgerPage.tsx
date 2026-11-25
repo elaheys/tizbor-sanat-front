@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   useDeleteLedgerEntry,
   usePartnerLedger,
-  usePartnerLedgerHistory,
+  usePartnerLedgerHistoryInfinite,
   useSettleLedgerEntry,
   useUpdateLedgerEntry,
 } from "@/api/partnerLedger/queries";
@@ -14,8 +14,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { LedgerCard } from "@/components/ui/LedgerCard";
 import { Sheet } from "@/components/ui/Sheet";
+import { LedgerCardSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -64,12 +66,13 @@ export function LedgerPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const open = usePartnerLedger({ is_settled: false });
-  const history = usePartnerLedgerHistory();
+  const history = usePartnerLedgerHistoryInfinite();
   const settle = useSettleLedgerEntry();
   const deleteEntry = useDeleteLedgerEntry();
 
+  const historyRows = history.data?.pages.flatMap((p) => p.data) ?? [];
   const showAdminActions = isAdmin && !viewAsPartner;
-  const rows = tab === "open" ? open.data : history.data;
+  const rows = tab === "open" ? open.data : historyRows;
   const isLoading = tab === "open" ? open.isLoading : history.isLoading;
   const isError = tab === "open" ? open.isError : history.isError;
   const error = tab === "open" ? open.error : history.error;
@@ -87,14 +90,14 @@ export function LedgerPage() {
                 type="button"
                 onClick={() => setViewAsPartner((v) => !v)}
                 className={cn(
-                  "relative h-[19px] w-[34px] rounded-full transition-colors",
+                  "relative h-4.75 w-8.5 rounded-full transition-colors",
                   viewAsPartner ? "bg-brand" : "bg-border",
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-0.5 size-[15px] rounded-full bg-white shadow transition-all",
-                    viewAsPartner ? "left-[17px]" : "left-0.5",
+                    "absolute top-0.5 size-3.75 rounded-full bg-white shadow transition-all",
+                    viewAsPartner ? "left-4.25" : "left-0.5",
                   )}
                 />
               </button>
@@ -105,7 +108,7 @@ export function LedgerPage() {
       <Content>
         <Tabs.Root value={tab} onValueChange={(v) => setTab(v as "open" | "history")}>
           <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <Tabs.List className="inline-flex gap-0.5 rounded-[11px] border border-border bg-surface-alt p-[3px]">
+            <Tabs.List className="inline-flex gap-0.5 rounded-[11px] border border-border bg-surface-alt p-0.75">
               <Tabs.Trigger
                 value="open"
                 className={cn(
@@ -133,7 +136,11 @@ export function LedgerPage() {
           </div>
 
           <div className="mt-4">
-            {isLoading && <Spinner />}
+            {isLoading && (
+              <Card>
+                <SkeletonList count={4} item={LedgerCardSkeleton} />
+              </Card>
+            )}
             {isError && <ErrorBanner message={getApiErrorMessage(error)} />}
             {rows && (
               <Card>
@@ -179,16 +186,23 @@ export function LedgerPage() {
                     }
                     metaLeft={entry.note ?? (entry.type === "loan" ? "قرض نقدی" : "تسویهٔ سود")}
                     metaRight={
-                      tab === "open" && showAdminActions && editingId !== entry.id ? (
-                        <button
-                          onClick={() => settle.mutate(entry.id)}
-                          className="rounded-md border border-border bg-surface px-3 py-1 text-[11.5px] font-semibold"
-                        >
-                          تسویه شد
-                        </button>
-                      ) : tab === "history" ? (
+                      tab === "open" ? (
+                        <div className="flex items-center gap-2">
+                          <span className="tabular-fa text-[11px] text-muted">
+                            {toJalaliDate(entry.entry_date)}
+                          </span>
+                          {showAdminActions && editingId !== entry.id && (
+                            <button
+                              onClick={() => settle.mutate(entry.id)}
+                              className="rounded-md border border-border bg-surface px-3 py-1 text-[11.5px] font-semibold cursor-pointer hover:bg-brand-soft transition-all"
+                            >
+                              تسویه شد
+                            </button>
+                          )}
+                        </div>
+                      ) : (
                         <span className="tabular-fa">{toJalaliDate(entry.settled_at)}</span>
-                      ) : null
+                      )
                     }
                   >
                     {editingId === entry.id && (
@@ -200,6 +214,19 @@ export function LedgerPage() {
                   <p className="p-8 text-center text-xs text-muted">
                     {tab === "open" ? "موردی باز نیست" : "تاریخچه‌ای وجود ندارد"}
                   </p>
+                )}
+                {tab === "history" && history.hasNextPage && (
+                  <>
+                    {history.isFetchingNextPage && (
+                      <div className="flex justify-center p-4">
+                        <Spinner />
+                      </div>
+                    )}
+                    <InfiniteScrollSentinel
+                      onIntersect={() => history.fetchNextPage()}
+                      disabled={history.isFetchingNextPage}
+                    />
+                  </>
                 )}
               </Card>
             )}

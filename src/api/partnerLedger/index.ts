@@ -6,9 +6,11 @@ import type {
   PartnerLedgerEntryWithNames,
   UpdateLedgerEntryInput,
 } from "@/types/ledger";
+import type { Page } from "@/types/pagination";
 
 const LEDGER_PREFIX = "/partner-ledger";
 const LOANS_PREFIX = "/loans";
+const PAGE_SIZE = 10;
 
 export const partnerLedgerApi = {
   list: (filters?: LedgerFilters, options?: RequestOptions) =>
@@ -18,6 +20,13 @@ export const partnerLedgerApi = {
       params: { from, to },
       ...options,
     }),
+  historyPage: (page: number, options?: RequestOptions) =>
+    api
+      .get<Page<PartnerLedgerEntryWithNames>>(`${LEDGER_PREFIX}/history`, {
+        params: { page, limit: PAGE_SIZE },
+        ...options,
+      })
+      .then((res) => res.data),
   update: (id: number, data: UpdateLedgerEntryInput) =>
     api.patch<PartnerLedgerEntry>(`${LEDGER_PREFIX}/${id}`, data),
   delete: (id: number) => api.delete<void>(`${LEDGER_PREFIX}/${id}`),

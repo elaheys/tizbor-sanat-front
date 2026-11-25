@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { customerAccountsApi, customersApi } from "./index";
 import { queryClient } from "@/lib/queryClient";
 import type {
@@ -37,6 +37,14 @@ export const customerAccountQueries = {
 };
 
 export const useCustomers = (q?: string) => useQuery(customerQueries.list(q));
+
+export const useCustomersInfinite = (q?: string) =>
+  useInfiniteQuery({
+    queryKey: [...all, "infinite", q ?? ""],
+    queryFn: ({ pageParam, signal }) => customersApi.listPage(q, pageParam, { signal }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => (lastPage.has_more ? allPages.length + 1 : undefined),
+  });
 export const useCustomer = (id: number) => useQuery(customerQueries.detail(id));
 export const useCustomerAccount = (id: number) => useQuery(customerAccountQueries.detail(id));
 
@@ -72,6 +80,10 @@ export const useCreateCustomerAccount = () =>
     }) => customerAccountsApi.create(data, idempotencyKey),
     onSuccess: (_res, variables) => {
       queryClient.invalidateQueries({ queryKey: [...all, "detail", variables.data.customer_id] });
+      // a new pre-sale account immediately opens a balance — the "customers with an
+      // open balance" report, and the chip next to this customer in the list, both
+      // read from it and would otherwise show stale (zero) data until reloaded.
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
 
@@ -89,5 +101,8 @@ export const useAddCustomerPayment = () =>
     onSuccess: (_res, variables) => {
       queryClient.invalidateQueries({ queryKey: [...accountsAll, "detail", variables.accountId] });
       queryClient.invalidateQueries({ queryKey: all });
+      // same reason as useCreateCustomerAccount — a payment changes the remaining
+      // balance the reports endpoint reports.
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });

@@ -11,7 +11,7 @@ import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { LedgerCard } from "@/components/ui/LedgerCard";
 import { Sheet } from "@/components/ui/Sheet";
-import { Spinner } from "@/components/ui/Spinner";
+import { SkeletonList, StatTileSkeleton, TxRowSkeleton } from "@/components/ui/skeletons";
 import { StatTile } from "@/components/ui/StatTile";
 import { TxRow } from "@/components/ui/TxRow";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -53,7 +53,13 @@ export function DashboardPage() {
         actions={<Chip tone="brand">{isAdmin ? "حسابدار" : "شریک"}</Chip>}
       />
       <Content>
-        {daily.isLoading && <Spinner />}
+        {daily.isLoading && (
+          <div className="grid grid-cols-3 gap-3">
+            <StatTileSkeleton />
+            <StatTileSkeleton />
+            <StatTileSkeleton />
+          </div>
+        )}
         {daily.isError && <ErrorBanner message={getApiErrorMessage(daily.error)} />}
         {daily.data && (
           <div className="grid grid-cols-3 gap-3">
@@ -77,11 +83,11 @@ export function DashboardPage() {
         {!isAdmin && myShare && (
           <div>
             <h2 className="mb-2.5 text-[14.5px] font-bold">سهم من از سود این ماه</h2>
-            <div className="flex flex-col gap-1 rounded-[14px] bg-brand p-4.5">
+            <div className="flex flex-col gap-1 rounded-md bg-brand p-4.5">
               <span className="text-xs text-brand-ink-tint">
                 این ماه · سهم {myShare.share_percent}٪
               </span>
-              <span className="tabular-fa text-[27px] font-extrabold text-white">
+              <span className="tabular-fa text-[27px] font-bold text-white">
                 {formatToman(myShare.profit_share)}{" "}
                 <span className="text-[13px] font-semibold text-brand-ink-tint">تومان</span>
               </span>
@@ -100,7 +106,7 @@ export function DashboardPage() {
               </Link>
             </div>
             <Card>
-              {recentTx.isLoading && <Spinner className="m-4" />}
+              {recentTx.isLoading && <SkeletonList count={5} item={TxRowSkeleton} />}
               {recentTx.data?.slice(0, 5).map((tx) => (
                 <TxRow key={tx.id} tx={tx} />
               ))}

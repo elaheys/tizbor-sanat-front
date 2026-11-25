@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Sheet } from "@/components/ui/Sheet";
-import { Spinner } from "@/components/ui/Spinner";
+import { ListRowSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { Partner } from "@/types/partner";
@@ -40,7 +40,11 @@ export function PartnersPage() {
         }
       />
       <Content>
-        {partners.isLoading && <Spinner />}
+        {partners.isLoading && (
+          <Card>
+            <SkeletonList count={4} item={ListRowSkeleton} />
+          </Card>
+        )}
         {partners.isError && <ErrorBanner message={getApiErrorMessage(partners.error)} />}
         {partners.data && (
           <Card>

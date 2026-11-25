@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { loansApi, partnerLedgerApi } from "./index";
 import { queryClient } from "@/lib/queryClient";
 import type { CreateLoanInput, LedgerFilters, UpdateLedgerEntryInput } from "@/types/ledger";
@@ -25,7 +25,21 @@ export const usePartnerLedger = (filters?: LedgerFilters) =>
 export const usePartnerLedgerHistory = (from?: string, to?: string) =>
   useQuery(partnerLedgerQueries.history(from, to));
 
-const invalidateLedger = () => queryClient.invalidateQueries({ queryKey: all });
+export const usePartnerLedgerHistoryInfinite = () =>
+  useInfiniteQuery({
+    queryKey: [...all, "history", "infinite"],
+    queryFn: ({ pageParam, signal }) => partnerLedgerApi.historyPage(pageParam, { signal }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => (lastPage.has_more ? allPages.length + 1 : undefined),
+  });
+
+// A loan's open/settled state feeds each partner's net_loan_balance and closing_balance
+// in the monthly report, so ledger mutations have to invalidate "reports" too, the same
+// way useGenerateSettlements already does in the other direction.
+const invalidateLedger = () => {
+  queryClient.invalidateQueries({ queryKey: all });
+  queryClient.invalidateQueries({ queryKey: ["reports"] });
+};
 
 export const useCreateLoan = () =>
   useMutation({

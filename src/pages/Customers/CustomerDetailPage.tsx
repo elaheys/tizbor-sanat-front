@@ -8,7 +8,8 @@ import { Chip } from "@/components/ui/Chip";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Sheet } from "@/components/ui/Sheet";
-import { Spinner } from "@/components/ui/Spinner";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { AccountCardSkeleton } from "@/components/ui/skeletons";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
 import { toJalaliDate } from "@/utils/jalali";
@@ -27,7 +28,20 @@ export function CustomerDetailPage() {
   const [newAccountOpen, setNewAccountOpen] = useState(false);
   const [openAccountId, setOpenAccountId] = useState<number | null>(null);
 
-  if (customer.isLoading) return <Spinner className="m-6" />;
+  if (customer.isLoading) {
+    return (
+      <div>
+        <Topbar title={<Skeleton className="h-4 w-28" />} />
+        <Content>
+          <h2 className="text-[14.5px] font-bold">حساب‌های قسطی</h2>
+          <div className="flex flex-col gap-3">
+            <AccountCardSkeleton />
+            <AccountCardSkeleton />
+          </div>
+        </Content>
+      </div>
+    );
+  }
   if (customer.isError) return <ErrorBanner message={getApiErrorMessage(customer.error)} />;
   if (!customer.data) return null;
 

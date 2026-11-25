@@ -1,4 +1,5 @@
 import { Pencil } from "lucide-react";
+import { Tooltip } from "./Tooltip";
 import { TxIcon } from "./TxIcon";
 import type { TransactionWithNames } from "@/types/transaction";
 import { toJalaliDateTime } from "@/utils/jalali";
@@ -31,13 +32,15 @@ export function TxRow({ tx, onEdit }: { tx: TransactionWithNames; onEdit?: () =>
         </span>
       </div>
       {onEdit && (
-        <button
-          onClick={onEdit}
-          className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-edit-soft bg-edit-soft text-edit"
-          aria-label="ویرایش تراکنش"
-        >
-          <Pencil className="size-3.5" />
-        </button>
+        <Tooltip label="ویرایش تراکنش">
+          <button
+            onClick={onEdit}
+            className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-edit-soft bg-edit-soft text-edit"
+            aria-label="ویرایش تراکنش"
+          >
+            <Pencil className="size-3.5" />
+          </button>
+        </Tooltip>
       )}
     </div>
   );

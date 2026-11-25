@@ -8,6 +8,7 @@ import { useLogin } from "@/api/auth/queries";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { paths } from "@/routes/paths";
 import { useAuthStore } from "@/store/authStore";
@@ -48,7 +49,7 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-surface p-5">
-      <div className="shadow-card flex min-h-[520px] w-full max-w-[940px] overflow-hidden rounded-[28px] border border-border bg-surface">
+      <div className="shadow-card flex min-h-130 w-full max-w-235 overflow-hidden rounded-[28px] border border-border bg-surface">
         {/* visual pane */}
         <div
           className="relative hidden flex-1 flex-col justify-between overflow-hidden p-7.5 text-white md:flex"
@@ -62,7 +63,7 @@ export function LoginPage() {
             fill="none"
             stroke="#fff"
             strokeWidth="3"
-            className="pointer-events-none absolute -end-[10%] -top-[10%] w-[78%] opacity-15"
+            className="pointer-events-none absolute inset-e-[-10%] top-[-10%] w-[78%] opacity-15"
           >
             <circle cx="55" cy="140" r="16" />
             <circle cx="90" cy="110" r="16" />
@@ -116,14 +117,16 @@ export function LoginPage() {
                     {...register("password")}
                     error={errors.password?.message}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setWatch(!watch)}
-                    className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
-                    aria-label={watch ? "Hide password" : "Show password"}
-                  >
-                    {watch ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </button>
+                  <Tooltip label={watch ? "مخفی کردن رمز" : "نمایش رمز"}>
+                    <button
+                      type="button"
+                      onClick={() => setWatch(!watch)}
+                      className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
+                      aria-label={watch ? "Hide password" : "Show password"}
+                    >
+                      {watch ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 

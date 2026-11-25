@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { TooltipProvider } from "@/components/ui/Tooltip";
 import { AUTH_EXPIRED_EVENT } from "@/lib/axios";
 import { queryClient } from "@/lib/queryClient";
 import { useAuthStore } from "@/store/authStore";
@@ -16,7 +17,9 @@ window.addEventListener(AUTH_EXPIRED_EVENT, () => {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <TooltipProvider delayDuration={300}>
+        <RouterProvider router={router} />
+      </TooltipProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </StrictMode>,

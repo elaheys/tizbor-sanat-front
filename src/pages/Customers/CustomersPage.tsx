@@ -14,6 +14,7 @@ import { ListRow } from "@/components/ui/ListRow";
 import { Sheet } from "@/components/ui/Sheet";
 import { ListRowSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { paths } from "@/routes/paths";
 import { useAuthStore } from "@/store/authStore";
@@ -24,9 +25,10 @@ export function CustomersPage() {
   const isAdmin = useAuthStore((state) => state.partner?.role === "admin");
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const debouncedQ = useDebouncedValue(q, 200);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const customers = useCustomersInfinite(q || undefined);
+  const customers = useCustomersInfinite(debouncedQ || undefined);
   const customerRows = customers.data?.pages.flatMap((p) => p.data) ?? [];
   const openBalances = useCustomersOpenBalance();
 

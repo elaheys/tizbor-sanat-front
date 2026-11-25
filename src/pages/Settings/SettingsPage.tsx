@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
@@ -22,6 +23,7 @@ type FormValues = z.infer<typeof schema>;
 
 export function SettingsPage() {
   const partner = useAuthStore((state) => state.partner);
+  const logout = useAuthStore((state) => state.logout);
   const changePassword = useChangePassword();
   const [watchCurrent, setWatchCurrent] = useState(false);
   const [watchNew, setWatchNew] = useState(false);
@@ -37,22 +39,22 @@ export function SettingsPage() {
   });
 
   const onSubmit = handleSubmit((values) => {
-    changePassword.mutate(values, { onSuccess: () => reset() });
+    // the backend invalidates every token already issued to this partner on a password
+    // change, so the current session is stale too — log out here right away instead of
+    // waiting for the next request to fail and bounce the user out mid-action
+    changePassword.mutate(values, {
+      onSuccess: () => {
+        reset();
+        logout();
+      },
+    });
   });
-
-  const onWatchClick = (watch: boolean, name: string) => {
-    if (name === "pass1") {
-      setWatch(!watch);
-    } else {
-      setWatch(!watch);
-    }
-  };
 
   return (
     <div>
       <Topbar title="تنظیمات حساب" />
       <Content>
-        <div className="max-w-[420px]">
+        <div className="max-w-105">
           <h2 className="mb-2.5 text-[14.5px] font-bold">اطلاعات حساب</h2>
           <Card className="px-4 py-1">
             <div className="flex justify-between border-b border-border py-2.5 text-[12.5px] last:border-0">
@@ -72,7 +74,7 @@ export function SettingsPage() {
           </Card>
         </div>
 
-        <div className="max-w-[420px]">
+        <div className="max-w-105">
           <h2 className="mb-2.5 text-[14.5px] font-bold">تغییر رمز عبور</h2>
           <Card className="flex flex-col gap-4 p-4">
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -86,14 +88,16 @@ export function SettingsPage() {
                     {...register("current_password")}
                     error={errors.current_password?.message}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setWatchCurrent((prev) => !prev)}
-                    className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
-                    aria-label={watchCurrent ? "Hide password" : "Show password"}
-                  >
-                    {watchCurrent ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </button>
+                  <Tooltip label={watchCurrent ? "مخفی کردن رمز" : "نمایش رمز"}>
+                    <button
+                      type="button"
+                      onClick={() => setWatchCurrent((prev) => !prev)}
+                      className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
+                      aria-label={watchCurrent ? "Hide password" : "Show password"}
+                    >
+                      {watchCurrent ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -106,19 +110,26 @@ export function SettingsPage() {
                     {...register("new_password")}
                     error={errors.new_password?.message}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setWatchNew((prev) => !prev)}
-                    className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
-                    aria-label={watchNew ? "Hide password" : "Show password"}
-                  >
-                    {watchNew ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </button>
+                  <Tooltip label={watchNew ? "مخفی کردن رمز" : "نمایش رمز"}>
+                    <button
+                      type="button"
+                      onClick={() => setWatchNew((prev) => !prev)}
+                      className="absolute inset-e-3 top-2.75 cursor-pointer text-muted"
+                      aria-label={watchNew ? "Hide password" : "Show password"}
+                    >
+                      {watchNew ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 
               {changePassword.isError && (
-                <ErrorBanner message={getApiErrorMessage(changePassword.error)} />
+                <ErrorBanner
+                  message={getApiErrorMessage(
+                    changePassword.error,
+                    "تغییر رمز عبور با خطا مواجه شد",
+                  )}
+                />
               )}
               {changePassword.isSuccess && (
                 <p className="text-[11.5px] text-brand-dark">رمز عبور با موفقیت تغییر کرد</p>

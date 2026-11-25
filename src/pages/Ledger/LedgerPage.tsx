@@ -20,6 +20,7 @@ import { LedgerCard } from "@/components/ui/LedgerCard";
 import { Sheet } from "@/components/ui/Sheet";
 import { LedgerCardSkeleton, SkeletonList } from "@/components/ui/skeletons";
 import { Spinner } from "@/components/ui/Spinner";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
@@ -167,20 +168,24 @@ export function LedgerPage() {
                       tab === "open" &&
                       showAdminActions && (
                         <>
-                          <button
-                            onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
-                            className="flex size-7 items-center justify-center rounded-lg border border-edit-soft bg-edit-soft text-edit"
-                            aria-label="ویرایش مانده"
-                          >
-                            <Pencil className="size-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTargetId(entry.id)}
-                            className="flex size-7 items-center justify-center rounded-lg border border-danger-soft bg-danger-soft text-danger"
-                            aria-label="حذف مانده"
-                          >
-                            <Trash2 className="size-3.5" />
-                          </button>
+                          <Tooltip label="ویرایش مانده">
+                            <button
+                              onClick={() => setEditingId(editingId === entry.id ? null : entry.id)}
+                              className="flex size-7 items-center justify-center rounded-lg border border-edit-soft bg-edit-soft text-edit"
+                              aria-label="ویرایش مانده"
+                            >
+                              <Pencil className="size-3.5" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip label="حذف مانده">
+                            <button
+                              onClick={() => setDeleteTargetId(entry.id)}
+                              className="flex size-7 items-center justify-center rounded-lg border border-danger-soft bg-danger-soft text-danger"
+                              aria-label="حذف مانده"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
+                          </Tooltip>
                         </>
                       )
                     }

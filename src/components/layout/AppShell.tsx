@@ -61,10 +61,11 @@ export function AppShell() {
           </div>
           <button
             onClick={logout}
-            className="ms-auto rounded-md p-1.5 text-brand-ink-muted hover:text-white"
+            className="ms-auto flex items-center gap-1 rounded-md p-1.5 text-brand-ink-muted hover:text-white"
             aria-label="خروج"
           >
-            <LogOut className="size-4" />
+            <LogOut className="size-3.5" />
+            <span className="text-[12px] whitespace-nowrap">خروج</span>
           </button>
         </div>
       </aside>

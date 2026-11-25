@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useCreatePartner, useUpdatePartner } from "@/api/partners/queries";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { Partner } from "@/types/partner";
+import { SetCredentialsForm } from "./SetCredentialsForm";
 
 const schema = z.object({
   name: z.string().min(1, "نام را وارد کنید"),
@@ -22,16 +23,21 @@ type FormValues = z.infer<typeof schema>;
 export function PartnerForm({ partner, onDone }: { partner?: Partner; onDone: () => void }) {
   const createPartner = useCreatePartner();
   const updatePartner = useUpdatePartner();
+  const [createdPartner, setCreatedPartner] = useState<Partner | null>(null);
   const {
     register,
     control,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: "", role: "partner", share_percent: 0 },
   });
+
+  const role = watch("role");
 
   useEffect(() => {
     if (partner)
@@ -42,15 +48,42 @@ export function PartnerForm({ partner, onDone }: { partner?: Partner; onDone: ()
       });
   }, [partner, reset]);
 
+  useEffect(() => {
+    if (role === "admin") setValue("share_percent", 0);
+  }, [role, setValue]);
+
   const mutation = partner ? updatePartner : createPartner;
 
   const onSubmit = handleSubmit((values) => {
     if (partner) {
       updatePartner.mutate({ id: partner.id, data: values }, { onSuccess: onDone });
     } else {
-      createPartner.mutate(values, { onSuccess: onDone });
+      createPartner.mutate(values, {
+        onSuccess: (res) => setCreatedPartner(res.data),
+      });
     }
   });
+
+  // right after creating a new partner/admin record, ask for their login username +
+  // password in the same sheet — without this step the account exists but can't log in
+  if (createdPartner) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="rounded-lg bg-accent-soft p-3 text-xs text-accent-ink">
+          «{createdPartner.name}» ساخته شد. برای این‌که بتونه وارد بشه، یه نام کاربری و رمز عبور
+          براش تعیین کن.
+        </p>
+        <SetCredentialsForm partnerId={createdPartner.id} onDone={onDone} />
+        <button
+          type="button"
+          onClick={onDone}
+          className="text-center text-[11.5px] font-semibold text-muted"
+        >
+          بعداً انجام می‌دهم
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -81,21 +114,12 @@ export function PartnerForm({ partner, onDone }: { partner?: Partner; onDone: ()
           id="share_percent"
           type="number"
           inputMode="numeric"
+          disabled={role === "admin"}
           {...register("share_percent", { valueAsNumber: true })}
           error={errors.share_percent?.message}
         />
+        {role === "admin" && <p className="text-[11px] text-muted">حسابدارها سهمی از سود ندارند</p>}
       </div>
-
-      {!partner && (
-        <p className="rounded-lg bg-accent-soft p-3 text-xs text-accent-ink">
-          این فرم فقط رکورد شریک را می‌سازد. برای تعیین نام کاربری و رمز عبور این شریک، باید روی
-          سرور دستور زیر را اجرا کنید؛ در حال حاضر API راهی برای تنظیم نام کاربری ندارد:
-          <br />
-          <code dir="ltr">
-            node scripts/set_password.js &lt;partner_id&gt; &lt;username&gt; &lt;password&gt;
-          </code>
-        </p>
-      )}
 
       {mutation.isError && <ErrorBanner message={getApiErrorMessage(mutation.error)} />}
 

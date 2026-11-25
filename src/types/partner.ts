@@ -28,3 +28,8 @@ export interface UpdatePartnerInput {
   is_active?: boolean;
   share_percent?: number;
 }
+
+export interface SetCredentialsInput {
+  username: string;
+  password: string;
+}

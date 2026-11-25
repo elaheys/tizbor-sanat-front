@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { partnersApi } from "./index";
 import { queryClient } from "@/lib/queryClient";
-import type { CreatePartnerInput, UpdatePartnerInput } from "@/types/partner";
+import type { CreatePartnerInput, SetCredentialsInput, UpdatePartnerInput } from "@/types/partner";
 
 const all = ["partners"] as const;
 
@@ -41,4 +41,17 @@ export const useResetPartnerPassword = () =>
   useMutation({
     mutationFn: ({ id, newPassword }: { id: number; newPassword: string }) =>
       partnersApi.resetPassword(id, newPassword),
+  });
+
+export const useSetPartnerCredentials = () =>
+  useMutation({
+    mutationFn: ({ id, data }: { id: number; data: SetCredentialsInput }) =>
+      partnersApi.setCredentials(id, data),
+    onSuccess: invalidatePartners,
+  });
+
+export const useDeletePartner = () =>
+  useMutation({
+    mutationFn: (id: number) => partnersApi.remove(id),
+    onSuccess: invalidatePartners,
   });

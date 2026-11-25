@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Sheet } from "@/components/ui/Sheet";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AccountCardSkeleton } from "@/components/ui/skeletons";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { useAuthStore } from "@/store/authStore";
 import { toJalaliDate } from "@/utils/jalali";
@@ -52,13 +53,15 @@ export function CustomerDetailPage() {
           <span className="flex items-center gap-2">
             {customer.data.name}
             {isAdmin && (
-              <button
-                onClick={() => setEditOpen(true)}
-                className="text-muted hover:text-edit"
-                aria-label="ویرایش مشتری"
-              >
-                <Pencil className="size-3.5" />
-              </button>
+              <Tooltip label="ویرایش مشتری">
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="text-muted hover:text-edit"
+                  aria-label="ویرایش مشتری"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+              </Tooltip>
             )}
           </span>
         }

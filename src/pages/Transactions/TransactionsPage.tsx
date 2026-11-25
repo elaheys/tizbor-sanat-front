@@ -5,6 +5,7 @@ import { useDeleteTransaction, useTransactionsInfinite } from "@/api/transaction
 import { Content, Topbar } from "@/components/layout/Topbar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { Select } from "@/components/ui/Select";
@@ -31,6 +32,7 @@ export function TransactionsPage() {
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<TransactionWithNames | undefined>(undefined);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const partners = usePartners();
   const transactions = useTransactionsInfinite(filters);
@@ -141,17 +143,24 @@ export function TransactionsPage() {
         <TransactionForm transaction={editing} onDone={() => setSheetOpen(false)} />
         {editing && (
           <button
-            onClick={() => {
-              if (confirm("این تراکنش حذف شود؟")) {
-                deleteTx.mutate(editing.id, { onSuccess: () => setSheetOpen(false) });
-              }
-            }}
+            onClick={() => setDeleteConfirmOpen(true)}
             className="mt-2 w-full text-center text-[11.5px] font-semibold text-danger"
           >
             حذف این تراکنش
           </button>
         )}
       </Sheet>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="این تراکنش حذف شود؟"
+        onConfirm={() => {
+          if (editing) {
+            deleteTx.mutate(editing.id, { onSuccess: () => setSheetOpen(false) });
+          }
+        }}
+      />
     </div>
   );
 }

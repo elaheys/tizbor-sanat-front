@@ -13,6 +13,7 @@ import { AmountInput } from "@/components/ui/AmountInput";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { InfiniteScrollSentinel } from "@/components/ui/InfiniteScrollSentinel";
 import { LedgerCard } from "@/components/ui/LedgerCard";
@@ -64,6 +65,7 @@ export function LedgerPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [tab, setTab] = useState<"open" | "history">("open");
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
   const open = usePartnerLedger({ is_settled: false });
   const history = usePartnerLedgerHistoryInfinite();
@@ -173,9 +175,7 @@ export function LedgerPage() {
                             <Pencil className="size-3.5" />
                           </button>
                           <button
-                            onClick={() =>
-                              confirm("این مورد حذف شود؟") && deleteEntry.mutate(entry.id)
-                            }
+                            onClick={() => setDeleteTargetId(entry.id)}
                             className="flex size-7 items-center justify-center rounded-lg border border-danger-soft bg-danger-soft text-danger"
                             aria-label="حذف مانده"
                           >
@@ -237,6 +237,17 @@ export function LedgerPage() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen} title="ثبت قرض جدید">
         <LoanForm onDone={() => setSheetOpen(false)} />
       </Sheet>
+
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+        title="این مورد حذف شود؟"
+        onConfirm={() => {
+          if (deleteTargetId !== null) {
+            deleteEntry.mutate(deleteTargetId);
+          }
+        }}
+      />
     </div>
   );
 }
